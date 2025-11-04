@@ -59,14 +59,27 @@ class Database {
 
     private void openWithFlags(int flags, DatabaseErrorHandler errorHandler) {
         try {
-            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, errorHandler, null);
+            SQLiteDatabaseHook pageSizeHook = new SQLiteDatabaseHook() {
+                @Override
+                public void preKey(SQLiteConnection database) {
+                    // Set page size to 16KB before key is set
+                    database.executeForLong("PRAGMA cipher_page_size = 16384;", null, null);
+                }
+
+                @Override
+                public void postKey(SQLiteConnection database) {
+                    // Nothing to do after key is set
+                }
+            };
+            sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, errorHandler, pageSizeHook);
 
         }catch (Exception e) {
             Log.d(TAG, "Opening db in " + path + " with PRAGMA cipher_migrate");
             SQLiteDatabaseHook hook = new SQLiteDatabaseHook() {
                 @Override
                 public void preKey(SQLiteConnection database) {
-
+                    // Set page size to 16KB before key is set
+                    database.executeForLong("PRAGMA cipher_page_size = 16384;", null, null);
                 }
 
                 @Override

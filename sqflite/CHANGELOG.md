@@ -1,3 +1,7 @@
+## 3.5.0
+* Add support for 16 KB page size (`PRAGMA cipher_page_size = 16384`) for better performance and compatibility with modern storage systems.
+* Automatically set page size to 16 KB when opening databases on Android, iOS, and macOS.
+
 ## 3.4.0
 * Remove deprecation.
 * Update minimum version to Flutter 3.35 to support Android SDK 36.

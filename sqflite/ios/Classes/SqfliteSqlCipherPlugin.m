@@ -649,6 +649,9 @@ static NSInteger _databaseOpenCount = 0;
     }
 
     [queue inDatabase:^(FMDatabase *database) {
+        // Set page size to 16KB before setting the key
+        [database executeUpdate:@"PRAGMA cipher_page_size = 16384"];
+        
         if (password == nil) {
             [database setKey:@""];
         } else {

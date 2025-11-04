@@ -10,6 +10,8 @@ This fork makes use of the Dart package `sqflite_common` but with a native imple
 
 The SQLCipher version of the plugin is 4.x If you try to open a database encrypted with a lower version of SQLCipher, the plugin will try to migrate it to a new version using the operation `PRAGMA cipher_migrate` (This automatic migration to version 4 is only done in Android. PR welcome for this feature in iOS).
 
+**16 KB Page Size Support:** This fork now supports 16 KB page size for SQLCipher databases. The page size is automatically set to 16384 bytes (16 KB) when opening a database, which provides better performance and compatibility with modern storage systems.
+
 ### Install and use
 
 To add it in your project include this in the `pubspec.yml`.
