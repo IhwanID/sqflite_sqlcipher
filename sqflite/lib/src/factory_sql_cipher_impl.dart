@@ -41,7 +41,9 @@ class SqfliteSqlCipherDatabaseFactoryImpl
       return result;
     } on PlatformException catch (e) {
       if (e.code == sqliteErrorCode) {
-        throw SqfliteDatabaseException(e.message, e.details);
+        // Provide better error message when e.message is null
+        final errorMessage = e.message ?? 'Database error: ${e.code}';
+        throw SqfliteDatabaseException(errorMessage, e.details);
         //rethrow;
       } else {
         rethrow;
