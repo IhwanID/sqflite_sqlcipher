@@ -64,7 +64,8 @@ class Database {
                 public void preKey(SQLiteConnection database) {
                     try {
                         // Set page size to 16KB before key is set
-                        database.executeForLong("PRAGMA cipher_page_size = 16384;", null, null);
+                        // Note: Use execute() not executeForLong() as PRAGMA cipher_page_size doesn't return a value
+                        database.execute("PRAGMA cipher_page_size = 16384;", null, null);
                     } catch (Exception ex) {
                         Log.e(TAG, "Error setting cipher_page_size: " + ex.getMessage());
                         throw new RuntimeException("Failed to set cipher_page_size: " + ex.getMessage(), ex);
@@ -83,8 +84,13 @@ class Database {
             SQLiteDatabaseHook hook = new SQLiteDatabaseHook() {
                 @Override
                 public void preKey(SQLiteConnection database) {
-                    // Set page size to 16KB before key is set
-                    database.executeForLong("PRAGMA cipher_page_size = 16384;", null, null);
+                    try {
+                        // Set page size to 16KB before key is set
+                        // Note: Use execute() not executeForLong() as PRAGMA cipher_page_size doesn't return a value
+                        database.execute("PRAGMA cipher_page_size = 16384;", null, null);
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error setting cipher_page_size in migration: " + ex.getMessage());
+                    }
                 }
 
                 @Override
