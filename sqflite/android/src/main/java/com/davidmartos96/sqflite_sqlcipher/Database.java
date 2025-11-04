@@ -62,8 +62,13 @@ class Database {
             SQLiteDatabaseHook pageSizeHook = new SQLiteDatabaseHook() {
                 @Override
                 public void preKey(SQLiteConnection database) {
-                    // Set page size to 16KB before key is set
-                    database.executeForLong("PRAGMA cipher_page_size = 16384;", null, null);
+                    try {
+                        // Set page size to 16KB before key is set
+                        database.executeForLong("PRAGMA cipher_page_size = 16384;", null, null);
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Error setting cipher_page_size: " + ex.getMessage());
+                        throw new RuntimeException("Failed to set cipher_page_size: " + ex.getMessage(), ex);
+                    }
                 }
 
                 @Override
@@ -74,7 +79,7 @@ class Database {
             sqliteDatabase = SQLiteDatabase.openDatabase(path, password, null, flags, errorHandler, pageSizeHook);
 
         }catch (Exception e) {
-            Log.d(TAG, "Opening db in " + path + " with PRAGMA cipher_migrate");
+            Log.d(TAG, "Opening db in " + path + " with PRAGMA cipher_migrate. Error: " + e.getMessage());
             SQLiteDatabaseHook hook = new SQLiteDatabaseHook() {
                 @Override
                 public void preKey(SQLiteConnection database) {
@@ -84,11 +89,17 @@ class Database {
 
                 @Override
                 public void postKey(SQLiteConnection database) {
-                    long migrateRes = database.executeForLong("PRAGMA cipher_migrate;", null, null);
-
-                    if (migrateRes != 0) {
-                        // Throw the original exception, assuming a wrong password was provided
-                        throw e;
+                    try {
+                        long migrateRes = database.executeForLong("PRAGMA cipher_migrate;", null, null);
+                        if (migrateRes != 0) {
+                            // Throw the original exception with better error message
+                            throw new RuntimeException("Failed to open database: " + 
+                                (e.getMessage() != null ? e.getMessage() : "cipher_migrate failed"));
+                        }
+                    } catch (Exception migrateException) {
+                        // If migration fails, throw with original error context
+                        throw new RuntimeException("Failed to open/migrate database: " + 
+                            (e.getMessage() != null ? e.getMessage() : "Unknown database error"), e);
                     }
                 }
             };
